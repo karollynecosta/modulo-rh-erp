@@ -242,7 +242,7 @@ rm -f sistema_rh
 
 ### 🛡️ Validações Implementadas
 
-- **Nome**: Apenas letras, espaços, hífen e apostrofo
+- **Nome**: Apenas letras, espaços, hífen e apóstrofo
 - **CPF**: Exatamente 11 dígitos numéricos
 - **ID**: Formato 00001-99999, únicos no sistema
 - **Entrada**: Proteção contra buffer overflow
