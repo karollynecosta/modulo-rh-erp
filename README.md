@@ -365,7 +365,6 @@ Exemplo:
 - [ ] Relatórios em PDF
 - [ ] Sistema de permissões
 - [ ] Backup automático
-- [ ] API REST
 - [ ] Testes automatizados
 - [ ] Logs do sistema
 
@@ -379,13 +378,14 @@ Contribuições são bem-vindas! Para contribuir:
 4. **Push** para a branch
 5. **Abra** um Pull Request
 
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
 
 ## 👥 Autores
 
 - **Equipe de Desenvolvimento** - Sistema de RH Modular
+Karollyne 
+Jesse 
+Diego
+Guilheme 
 
 ---
 
