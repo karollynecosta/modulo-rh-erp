@@ -352,8 +352,10 @@ void operacoes_listar_por_setor_hierarquico(const SistemaRH *sistema) {
     
     // Criar array filtrado
     Funcionario *filtrados = malloc(count * sizeof(Funcionario));
-    if (!filtrados) return;
-    
+    if (!filtrados) {
+        printf("Erro: memoria insuficiente.\n");
+        return;
+    }
     int j = 0;
     for (int i = 0; i < sistema->num_funcionarios; i++) {
         if (strcmp(sistema->funcionarios[i].setor, setor_alvo) == 0) {
