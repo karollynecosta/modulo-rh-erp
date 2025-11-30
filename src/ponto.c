@@ -91,7 +91,8 @@ const char* ponto_get_ultimo_tipo(const SistemaRH *sistema, int id_funcionario, 
         if (sistema->pontos[i].id_funcionario == id_funcionario &&
             strcmp(sistema->pontos[i].data, data) == 0 &&
             strcmp(sistema->pontos[i].hora, ultima_hora) > 0) {
-            strcpy(ultima_hora, sistema->pontos[i].hora);
+            strncpy(ultima_hora, sistema->pontos[i].hora, 8);
+            ultima_hora[8] = '\0';
             ultimo_tipo = sistema->pontos[i].tipo;
         }
     }
