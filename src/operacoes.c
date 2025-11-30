@@ -313,8 +313,10 @@ void operacoes_listar_por_cargo_hierarquico(const SistemaRH *sistema) {
     
     // Criar cópia para ordenação
     Funcionario *ordenados = malloc(sistema->num_funcionarios * sizeof(Funcionario));
-    if (!ordenados) return;
-    
+    if (!ordenados) {
+        printf("Erro: memoria insuficiente.\n");
+        return;
+    }
     memcpy(ordenados, sistema->funcionarios, sistema->num_funcionarios * sizeof(Funcionario));
     qsort(ordenados, sistema->num_funcionarios, sizeof(Funcionario), comparar_por_cargo);
     
