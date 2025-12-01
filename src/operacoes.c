@@ -542,7 +542,9 @@ void operacoes_consultar_pontos(const SistemaRH *sistema) {
     printf("1 - Por funcionario\n");
     printf("2 - Por data\n");
     printf("3 - Relatorio mensal\n");
-    printf("4 - Todos os registros\n");
+    printf("4 - Calcular horas trabalhadas\n");
+    printf("5 - Detalhamento diario\n");
+    printf("6 - Todos os registros\n");
     printf("0 - Voltar\n");
     printf("Opcao: ");
     
@@ -599,6 +601,50 @@ void operacoes_consultar_pontos(const SistemaRH *sistema) {
             break;
             
         case 4:
+            id = validacao_entrada_id("Digite o ID do funcionario: ", NULL, -1);
+            if (id == 0) break;
+            
+            printf("Digite o mes (1-12): ");
+            if (scanf("%d", &mes) != 1) {
+                printf("Mes invalido.\n");
+                validacao_limpar_entrada();
+                break;
+            }
+            
+            printf("Digite o ano: ");
+            if (scanf("%d", &ano) != 1) {
+                printf("Ano invalido.\n");
+                validacao_limpar_entrada();
+                break;
+            }
+            validacao_limpar_entrada();
+            
+            ponto_calcular_horas_trabalhadas(sistema, id, mes, ano);
+            break;
+            
+        case 5:
+            id = validacao_entrada_id("Digite o ID do funcionario: ", NULL, -1);
+            if (id == 0) break;
+            
+            printf("Digite o mes (1-12): ");
+            if (scanf("%d", &mes) != 1) {
+                printf("Mes invalido.\n");
+                validacao_limpar_entrada();
+                break;
+            }
+            
+            printf("Digite o ano: ");
+            if (scanf("%d", &ano) != 1) {
+                printf("Ano invalido.\n");
+                validacao_limpar_entrada();
+                break;
+            }
+            validacao_limpar_entrada();
+            
+            ponto_listar_horas_diarias(sistema, id, mes, ano);
+            break;
+            
+        case 6:
             ponto_listar_todos(sistema);
             break;
             

@@ -8,58 +8,70 @@ graph TB
         A[main.c] --> B[interface.h/c]
         B --> C[Menu Principal]
         B --> D[Submenu Listagens]
-        B --> E[Seleção Interativa]
+        B --> E[Submenu Pontos]
+        B --> F[Seleção Interativa]
     end
 
     subgraph "🔧 CAMADA DE OPERAÇÕES"
-        F[operacoes.h/c] --> G[Cadastrar]
-        F --> H[Buscar]
-        F --> I[Editar]
-        F --> J[Excluir]
-        F --> K[Listar]
+        G[operacoes.h/c] --> H[Cadastrar]
+        G --> I[Buscar]
+        G --> J[Editar]
+        G --> K[Excluir]
+        G --> L[Listar]
+        G --> M[Bater Ponto]
+        G --> N[Consultar Pontos]
     end
 
     subgraph "🏢 CAMADA DE NEGÓCIO"
-        L[sistema_rh.h/c] --> M[Gerenciar Sistema]
-        L --> N[Inicializar Setores]
-        L --> O[Buscar por ID]
+        O[sistema_rh.h/c] --> P[Gerenciar Sistema]
+        O --> Q[Inicializar Setores]
+        O --> R[Buscar por ID]
         
-        P[funcionario.h/c] --> Q[CRUD Funcionário]
-        R[setor.h/c] --> S[Gestão Setores/Cargos]
+        S[funcionario.h/c] --> T[CRUD Funcionário]
+        U[setor.h/c] --> V[Gestão Setores/Cargos]
+        W[ponto.h/c] --> X[Sistema de Ponto]
+        W --> Y[Cálculo de Horas]
+        W --> Z[Relatórios]
     end
 
     subgraph "✅ CAMADA DE VALIDAÇÃO"
-        T[validacao.h/c] --> U[Validar Nome]
-        T --> V[Validar CPF]
-        T --> W[Validar ID]
-        T --> X[Entrada Segura]
+        AA[validacao.h/c] --> BB[Validar Nome]
+        AA --> CC[Validar CPF]
+        AA --> DD[Validar ID]
+        AA --> EE[Validar Data/Hora]
+        AA --> FF[Entrada Segura]
     end
 
     subgraph "💾 CAMADA DE PERSISTÊNCIA"
-        Y[persistencia.h/c] --> Z[Importar Arquivo]
-        Y --> AA[Exportar Arquivo]
+        GG[persistencia.h/c] --> HH[Importar Funcionários]
+        GG --> II[Exportar Funcionários]
+        GG --> JJ[Importar Pontos]
+        GG --> KK[Exportar Pontos]
     end
 
     subgraph "📊 CAMADA DE DADOS"
-        AB[types.h] --> AC[Estruturas]
-        AC --> AD[Funcionario]
-        AC --> AE[Setor]
-        AC --> AF[Cargo]
-        AC --> AG[SistemaRH]
+        LL[types.h] --> MM[Estruturas]
+        MM --> NN[Funcionario]
+        MM --> OO[Setor]
+        MM --> PP[Cargo]
+        MM --> QQ[RegistroPonto]
+        MM --> RR[SistemaRH]
     end
 
     %% Fluxo de dados
-    A --> F
-    F --> L
-    F --> P
-    F --> R
-    F --> T
-    F --> Y
-    L --> AB
-    P --> AB
-    R --> AB
-    T --> AB
-    Y --> AB
+    A --> G
+    G --> O
+    G --> S
+    G --> U
+    G --> W
+    G --> AA
+    G --> GG
+    O --> LL
+    S --> LL
+    U --> LL
+    W --> LL
+    AA --> LL
+    GG --> LL
 
     %% Estilos
     classDef interface fill:#e1f5fe,stroke:#01579b,stroke-width:2px
@@ -69,41 +81,57 @@ graph TB
     classDef persistence fill:#fce4ec,stroke:#880e4f,stroke-width:2px
     classDef data fill:#f1f8e9,stroke:#33691e,stroke-width:2px
 
-    class A,B,C,D,E interface
-    class F,G,H,I,J,K operations
-    class L,M,N,O,P,Q,R,S business
-    class T,U,V,W,X validation
-    class Y,Z,AA persistence
-    class AB,AC,AD,AE,AF,AG data
+    class A,B,C,D,E,F interface
+    class G,H,I,J,K,L,M,N operations
+    class O,P,Q,R,S,T,U,V,W,X,Y,Z business
+    class AA,BB,CC,DD,EE,FF validation
+    class GG,HH,II,JJ,KK persistence
+    class LL,MM,NN,OO,PP,QQ,RR data
 ```
 
-## 🔄 Fluxo de Dados
+## 🔄 Fluxo de Dados - Sistema de Ponto
 
 ```mermaid
 sequenceDiagram
     participant U as 👤 Usuário
     participant I as 🖥️ Interface
     participant O as 🔧 Operações
+    participant P as ⏰ Ponto
     participant V as ✅ Validação
     participant S as 🏢 Sistema
-    participant P as 💾 Persistência
     participant D as 📊 Dados
 
-    U->>I: Seleciona opção do menu
-    I->>O: Chama operação correspondente
-    O->>V: Solicita validação de entrada
-    V-->>O: Retorna dados válidos
-    O->>S: Processa lógica de negócio
-    S->>D: Manipula estruturas de dados
-    D-->>S: Retorna dados processados
-    S-->>O: Confirma operação
-    O->>P: Persiste alterações (se necessário)
-    P-->>O: Confirma persistência
-    O->>I: Retorna resultado
-    I->>U: Exibe feedback
+    Note over U,D: Fluxo de Bater Ponto
+    U->>I: Seleciona "6 - Bater ponto"
+    I->>O: operacoes_bater_ponto()
+    O->>V: validacao_entrada_id()
+    V-->>O: ID válido
+    O->>P: ponto_registrar_entrada/saida()
+    P->>S: sistema_rh_buscar_funcionario()
+    S->>D: Busca funcionário
+    D-->>S: Funcionário encontrado
+    P->>P: ponto_obter_data_atual()
+    P->>P: ponto_obter_hora_atual()
+    P->>D: Adiciona registro de ponto
+    P-->>O: Ponto registrado com sucesso
+    O->>I: Exibe confirmação
+    I->>U: "Ponto registrado!"
+
+    Note over U,D: Fluxo de Calcular Horas
+    U->>I: Seleciona "8 - Consultar pontos"
+    I->>I: Submenu de pontos
+    U->>I: Seleciona "4 - Calcular horas"
+    I->>O: operacoes_consultar_pontos()
+    O->>P: ponto_calcular_horas_trabalhadas()
+    P->>D: Busca registros do período
+    P->>P: ponto_calcular_horas_entre_horarios()
+    P->>P: ponto_converter_hora_para_decimal()
+    P-->>O: Relatório de horas
+    O->>I: Exibe relatório
+    I->>U: Total de horas trabalhadas
 ```
 
-## 🗂️ Estrutura de Módulos
+## 🗂️ Estrutura de Módulos Atualizada
 
 ```mermaid
 classDiagram
@@ -112,6 +140,8 @@ classDiagram
         +int num_funcionarios
         +Setor setores[]
         +int num_setores
+        +RegistroPonto pontos[]
+        +int num_pontos
         +init()
         +inicializar_setores()
         +buscar_funcionario_por_id()
@@ -131,6 +161,15 @@ classDiagram
         +formatar_para_arquivo()
     }
 
+    class RegistroPonto {
+        +int id_funcionario
+        +char data[]
+        +char hora[]
+        +char tipo[]
+        +char observacao[]
+        +init()
+    }
+
     class Setor {
         +char nome[]
         +Cargo cargos_permitidos[]
@@ -147,6 +186,25 @@ classDiagram
         +get_nome()
     }
 
+    class OperacoesPonto {
+        +bater_ponto()
+        +registrar_manual()
+        +consultar_pontos()
+        +calcular_horas_trabalhadas()
+        +listar_horas_diarias()
+    }
+
+    class SistemaPonto {
+        +registrar_entrada()
+        +registrar_saida()
+        +registrar_manual()
+        +listar_por_funcionario()
+        +relatorio_mensal()
+        +calcular_horas_trabalhadas()
+        +converter_hora_para_decimal()
+        +calcular_horas_entre_horarios()
+    }
+
     class Operacoes {
         +cadastrar_funcionario()
         +buscar_funcionario()
@@ -160,6 +218,8 @@ classDiagram
         +nome_valido()
         +cpf_valido()
         +id_valido()
+        +validar_data()
+        +validar_hora()
         +entrada_string()
         +entrada_id()
     }
@@ -167,26 +227,35 @@ classDiagram
     class Persistencia {
         +importar_de_arquivo()
         +exportar_para_arquivo()
+        +importar_pontos()
+        +exportar_pontos()
     }
 
     class Interface {
         +exibir_menu()
         +exibir_submenu_listagens()
+        +exibir_submenu_pontos()
         +selecionar_setor_interativo()
         +selecionar_cargo_interativo()
     }
 
     SistemaRH "1" *-- "0..*" Funcionario : contém
     SistemaRH "1" *-- "1..*" Setor : gerencia
+    SistemaRH "1" *-- "0..*" RegistroPonto : armazena
     Setor "1" *-- "1..*" Cargo : possui
+    RegistroPonto "1" --> "1" Funcionario : referencia
     Operacoes ..> SistemaRH : usa
+    OperacoesPonto ..> SistemaRH : usa
+    OperacoesPonto ..> SistemaPonto : usa
+    SistemaPonto ..> RegistroPonto : manipula
     Operacoes ..> Validacao : usa
+    OperacoesPonto ..> Validacao : usa
     Operacoes ..> Persistencia : usa
     Operacoes ..> Interface : usa
     Interface ..> SistemaRH : consulta
 ```
 
-## 📋 Dependências entre Módulos
+## 📋 Dependências entre Módulos Atualizada
 
 ```mermaid
 graph LR
@@ -200,6 +269,7 @@ graph LR
         valid[validacao.h/c]
         persist[persistencia.h/c]
         interface[interface.h/c]
+        ponto[ponto.h/c]
     end
 
     subgraph "📊 BUSINESS"
@@ -217,6 +287,7 @@ graph LR
     valid --> types
     persist --> types
     interface --> types
+    ponto --> types
     
     sistema --> types
     sistema --> setor
@@ -228,6 +299,10 @@ graph LR
     ops --> persist
     ops --> interface
     ops --> sistema
+    ops --> ponto
+    
+    ponto --> sistema
+    ponto --> func
     
     main --> sistema
     main --> ops
@@ -242,53 +317,90 @@ graph LR
     classDef application fill:#f48fb1,stroke:#c2185b,stroke-width:2px
 
     class types core
-    class func,setor,valid,persist,interface foundation
+    class func,setor,valid,persist,interface,ponto foundation
     class sistema,ops business
     class main application
 ```
 
-## ⚡ Fluxo de Compilação
+## 🚀 Funcionalidades do Sistema de Ponto
 
 ```mermaid
-flowchart TD
-    A[📝 Código Fonte] --> B{🔍 Makefile}
-    
-    B -->|release| C[🚀 Otimização -O2]
-    B -->|debug| D[🐛 Debug -g]
-    
-    C --> E[📁 Compilar src/*.c]
-    D --> E
-    
-    E --> F[📦 Gerar obj/*.o]
-    F --> G[🔗 main.c]
-    G --> H[🏗️ Linkar objetos]
-    H --> I[⚡ sistema_rh executável]
-    
-    I --> J{🎯 Target}
-    J -->|run| K[🚀 Executar programa]
-    J -->|clean| L[🧹 Limpar build/]
-    
-    style A fill:#e3f2fd
-    style I fill:#c8e6c9
-    style K fill:#fff3e0
-    style L fill:#ffebee
+mindmap
+  root((Sistema de Ponto))
+    Registro
+      Bater Ponto Automático
+        Data/Hora Atual
+        Entrada/Saída
+        Observações
+      Registro Manual
+        Data Personalizada
+        Hora Personalizada
+        Correções
+    Consultas
+      Por Funcionário
+        Histórico Completo
+        Filtros por Período
+      Por Data
+        Todos os Funcionários
+        Dia Específico
+      Relatório Mensal
+        Resumo Executivo
+        Dados Consolidados
+    Cálculos
+      Horas Trabalhadas
+        Total Mensal
+        Média Diária
+        Dias Trabalhados
+      Detalhamento Diário
+        Registros por Dia
+        Horas por Dia
+        Registros Incompletos
+    Validações
+      Formato Data/Hora
+        DD/MM/AAAA
+        HH:MM:SS
+      Consistência
+        Entrada antes Saída
+        Funcionário Existe
+        Sequência Lógica
 ```
+
+## 📊 Métricas e Relatórios
+
+### 🕒 Cálculo de Horas
+- **Conversão**: HH:MM:SS → Decimal (8.75h)
+- **Método**: Primeira entrada × última saída do dia
+- **Validação**: Ignora registros inválidos
+- **Precisão**: Até segundos
+
+### 📈 Tipos de Relatório
+1. **Horas Trabalhadas**: Total mensal com média
+2. **Detalhamento Diário**: Todos os pontos do dia
+3. **Registros Incompletos**: Identificação automática
+4. **Histórico Completo**: Por funcionário/período
 
 ---
 
-## 📝 Notas de Arquitetura
+## 📝 Notas Arquiteturais
 
-### 🎯 Princípios Aplicados
+### 🎯 Novos Princípios Aplicados (Sistema de Ponto)
 
-1. **Modularidade**: Cada módulo tem responsabilidade específica
-2. **Baixo Acoplamento**: Módulos interagem através de interfaces bem definidas
-3. **Alta Coesão**: Funcionalidades relacionadas agrupadas
-4. **Reutilização**: Código compartilhado em módulos comuns
-5. **Manutenibilidade**: Estrutura clara facilita modificações
+1. **Separação de Responsabilidades**: Módulo ponto.h/c independente
+2. **Cálculos Centralizados**: Funções específicas para conversões
+3. **Relatórios Flexíveis**: Múltiplas formas de visualização
+4. **Validação Robusta**: Data/hora com formatos específicos
+5. **Persistência Dupla**: Funcionários e pontos em arquivos separados
 
-### 🛡️ Camadas de Segurança
+### 🛡️ Camadas de Validação (Ponto)
 
-- **Validação de Entrada**: Todos os dados são validados
-- **Proteção de Memória**: Uso seguro de strings e arrays
-- **Verificação de Limites**: Prevenção de overflow
-- **Confirmação de Ações**: Operações críticas requerem confirmação
+- **Formato**: Validação de data DD/MM/AAAA e hora HH:MM:SS
+- **Lógica**: Saída não pode ser antes da entrada
+- **Existência**: Funcionário deve existir no sistema
+- **Consistência**: Avisos para sequências incomuns
+
+### 🔄 Padrões de Design (Sistema de Ponto)
+
+- **Calculator Pattern**: Funções específicas para cálculos
+- **Report Builder**: Diferentes tipos de relatório
+- **Validation Chain**: Múltiplas validações em sequência
+- **Data Transformation**: Conversão de formatos de hora

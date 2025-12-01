@@ -16,6 +16,8 @@ Um sistema completo de gerenciamento de recursos humanos desenvolvido em linguag
 - **Registro Manual** para correções e ajustes
 - **Consultas** por funcionário, data ou período
 - **Relatórios** mensais individualizados
+- **Cálculo de Horas** trabalhadas por período
+- **Detalhamento Diário** com total de horas
 - **Validação** de horários e controle de sequência
 
 ### 📊 Tipos de Listagem
@@ -297,6 +299,12 @@ void ponto_registrar_manual(SistemaRH *sistema, int id_funcionario, const char *
 // Consultas
 void ponto_listar_por_funcionario(const SistemaRH *sistema, int id_funcionario);
 void ponto_relatorio_mensal(const SistemaRH *sistema, int id_funcionario, int mes, int ano);
+void ponto_calcular_horas_trabalhadas(const SistemaRH *sistema, int id_funcionario, int mes, int ano);
+void ponto_listar_horas_diarias(const SistemaRH *sistema, int id_funcionario, int mes, int ano);
+
+// Cálculos
+double ponto_converter_hora_para_decimal(const char *hora);
+double ponto_calcular_horas_entre_horarios(const char *entrada, const char *saida);
 ```
 
 ### ✅ Validações
@@ -335,7 +343,9 @@ Consultar pontos:
 1 - Por funcionario
 2 - Por data  
 3 - Relatorio mensal
-4 - Todos os registros
+4 - Calcular horas trabalhadas
+5 - Detalhamento diario
+6 - Todos os registros
 0 - Voltar
 ```
 
