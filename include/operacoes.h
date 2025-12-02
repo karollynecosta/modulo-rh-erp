@@ -1,24 +1,28 @@
 #ifndef OPERACOES_H
 #define OPERACOES_H
 
-#include "types.h"
+#include "sistema_rh.h"
+#include "validacao.h"
 
-// Operações principais do sistema
-void operacoes_cadastrar_funcionario(SistemaRH *sistema);
-void operacoes_buscar_funcionario(const SistemaRH *sistema);
-void operacoes_editar_funcionario(SistemaRH *sistema);
-void operacoes_excluir_funcionario(SistemaRH *sistema);
+class OperacoesRH {
+public:
+    // Operações principais do sistema
+    static void cadastrarFuncionario(SistemaRH& sistema);
+    static void buscarFuncionario(const SistemaRH& sistema);
+    static void editarFuncionario(SistemaRH& sistema);
+    static void excluirFuncionario(SistemaRH& sistema);
 
-// Operações de ponto
-void operacoes_bater_ponto(SistemaRH *sistema);
-void operacoes_registrar_ponto_manual(SistemaRH *sistema);
-void operacoes_consultar_pontos(const SistemaRH *sistema);
+    // Operações de ponto
+    static void baterPonto(SistemaRH& sistema);
+    static void registrarPontoManual(SistemaRH& sistema);
+    static void consultarPontos(const SistemaRH& sistema);
 
-// Funções de listagem
-void operacoes_exibir_funcionarios(const SistemaRH *sistema);
-void operacoes_listar_por_nome(const SistemaRH *sistema);
-void operacoes_listar_por_cargo_hierarquico(const SistemaRH *sistema);
-void operacoes_listar_por_setor_hierarquico(const SistemaRH *sistema);
-void operacoes_listar_por_setor_e_cargo(const SistemaRH *sistema);
+    // Funções de listagem
+    static void exibirFuncionarios(const SistemaRH& sistema);
+    static void listarPorNome(const SistemaRH& sistema);
+    static void listarPorCargoHierarquico(const SistemaRH& sistema);
+    static void listarPorSetorHierarquico(const SistemaRH& sistema);
+    static void listarPorSetorECargo(const SistemaRH& sistema);
+};
 
 #endif

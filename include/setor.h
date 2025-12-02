@@ -3,15 +3,41 @@
 
 #include "types.h"
 
-// Funções para manipulação de setores
-void setor_init(Setor *s, const char *nome);
-void setor_adicionar_cargo(Setor *s, const char *nome_cargo);
-const char* setor_get_nome(const Setor *s);
-const Cargo* setor_get_cargos(const Setor *s);
-int setor_get_num_cargos(const Setor *s);
+// Classe para representar um cargo
+class Cargo {
+private:
+    string nome;
+public:
+    Cargo() = default;
+    Cargo(const string& nome);
+    
+    string getNome() const;
+    void setNome(const string& nome);
+};
 
-// Funções para cargos
-void cargo_init(Cargo *c, const char *nome);
-const char* cargo_get_nome(const Cargo *c);
+// Classe para representar um setor
+class Setor {
+private:
+    string nome;
+    vector<Cargo> cargosPermitidos;
+    
+public:
+    Setor() = default;
+    Setor(const string& nome);
+    
+    string getNome() const;
+    void setNome(const string& nome);
+    void adicionarCargo(const Cargo& cargo);
+    const vector<Cargo>& getCargos() const;
+    int getNumCargos() const;
+};
+
+// Validações específicas para setores e cargos
+namespace SetorValidacao {
+    bool nomeSetorValido(const string& nome);
+    bool nomeCargoValido(const string& nome);
+    bool setorTemCargo(const Setor& setor, const string& nomeCargo);
+    vector<string> listarCargosPermitidos(const Setor& setor);
+}
 
 #endif
