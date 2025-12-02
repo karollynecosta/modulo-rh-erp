@@ -3,24 +3,50 @@
 
 #include "types.h"
 
-// Funções para manipulação de funcionários
-void funcionario_init(Funcionario *f, const char *nome, const char *cpf, int id, 
-                     const char *setor, const char *cargo, const char *foto);
-void funcionario_set_nome(Funcionario *f, const char *nome);
-void funcionario_set_cpf(Funcionario *f, const char *cpf);
-void funcionario_set_id(Funcionario *f, int id);
-void funcionario_set_setor(Funcionario *f, const char *setor);
-void funcionario_set_cargo(Funcionario *f, const char *cargo);
-void funcionario_set_foto(Funcionario *f, const char *foto);
+// Classe para representar um funcionário
+class Funcionario {
+private:
+    string id;
+    string nome;
+    string cpf;
+    string setor;
+    string cargo;
+    string foto;
+    
+public:
+    Funcionario() = default;
+    Funcionario(int id, const string& nome, const string& cpf,
+               const string& setor, const string& cargo, const string& foto = "");
+    
+    // Getters
+    string getNome() const;
+    string getCPF() const;
+    int getID() const;
+    string getSetor() const;
+    string getCargo() const;
+    string getFoto() const;
+    
+    // Setters
+    void setNome(const string& nome);
+    void setCPF(const string& cpf);
+    void setID(int id);
+    void setSetor(const string& setor);
+    void setCargo(const string& cargo);
+    void setFoto(const string& foto);
+    
+    void exibirDados() const;
+    string formatarParaArquivo() const;
+};
 
-const char* funcionario_get_nome(const Funcionario *f);
-const char* funcionario_get_cpf(const Funcionario *f);
-int funcionario_get_id(const Funcionario *f);
-const char* funcionario_get_setor(const Funcionario *f);
-const char* funcionario_get_cargo(const Funcionario *f);
-const char* funcionario_get_foto(const Funcionario *f);
-
-void funcionario_exibir_dados(const Funcionario *f);
-void funcionario_formatar_para_arquivo(const Funcionario *f, char *buffer);
+// Validações específicas para funcionários
+namespace FuncionarioValidacao {
+    bool nomeValido(const string& nome);
+    bool cpfValido(const string& cpf);
+    bool setorValido(const string& setor);
+    bool cargoValido(const string& cargo);
+    bool fotoValida(const string& foto);
+    string formatarCPF(const string& cpf);
+    string formatarNome(const string& nome);
+}
 
 #endif
