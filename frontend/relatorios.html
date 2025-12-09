@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tchERP - Relatórios de Pontos</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+    <link rel="stylesheet" href="estilo.css">
+    <style>
+        .filtros {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .filtro-grupo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .resumo-card {
+            background: linear-gradient(135deg, #006837, #009b3a);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .resumo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .resumo-valor {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .ponto-item {
+            background: white;
+            border-left: 4px solid #006837;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .ponto-entrada {
+            border-left-color: #28a745;
+        }
+        .ponto-saida {
+            border-left-color: #dc3545;
+        }
+        .badge {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .badge-entrada {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge-saida {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .dia-grupo {
+            margin-bottom: 30px;
+        }
+        .dia-header {
+            background: linear-gradient(135deg, #ffd500, #ffbf00);
+            color: #004d00;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header class="cabecalho-logo">
+        <h1>⚡ tchERP</h1>
+        <p>🏛️ Sistema Gaúcho de Gestão de RH 🏛️</p>
+    </header>
+
+    <nav style="background: linear-gradient(135deg, #006837, #009b3a); padding: 15px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <a href="/" style="color: white; text-decoration: none; padding: 12px 24px; margin: 0 8px; background-color: rgba(255, 255, 255, 0.1); border-radius: 8px; border: 2px solid transparent; font-weight: 600; transition: all 0.3s;">🏠 Início</a>
+        <a href="/frontend/cadastro.html" style="color: white; text-decoration: none; padding: 12px 24px; margin: 0 8px; background-color: rgba(255, 255, 255, 0.1); border-radius: 8px; border: 2px solid transparent; font-weight: 600; transition: all 0.3s;">➕ Cadastrar</a>
+        <a href="/frontend/listagem.html" style="color: white; text-decoration: none; padding: 12px 24px; margin: 0 8px; background-color: rgba(255, 255, 255, 0.1); border-radius: 8px; border: 2px solid transparent; font-weight: 600; transition: all 0.3s;">📋 Listagem</a>
+        <a href="/frontend/pontos.html" style="color: white; text-decoration: none; padding: 12px 24px; margin: 0 8px; background-color: rgba(255, 255, 255, 0.1); border-radius: 8px; border: 2px solid transparent; font-weight: 600; transition: all 0.3s;">⏰ Pontos</a>
+        <a href="/frontend/relatorios.html" style="color: white; text-decoration: none; padding: 12px 24px; margin: 0 8px; background-color: rgba(255, 213, 0, 0.3); border-radius: 8px; border: 2px solid #ffd500; font-weight: 600; transition: all 0.3s;">📊 Relatórios</a>
+    </nav>
+
+    <main>
+        <h2>📊 Relatórios de Pontos</h2>
+        
+        <div class="filtros">
+            <h3 style="margin-top: 0;">🔍 Filtros</h3>
+            <div class="filtro-grupo">
+                <div class="campo-grupo">
+                    <label for="filtroFuncionario">Funcionário (opcional):</label>
+                    <select id="filtroFuncionario">
+                        <option value="">Todos os funcionários</option>
+                    </select>
+                </div>
+                <div class="campo-grupo">
+                    <label for="filtroDataInicio">Data Início:</label>
+                    <input type="date" id="filtroDataInicio">
+                </div>
+                <div class="campo-grupo">
+                    <label for="filtroDataFim">Data Fim:</label>
+                    <input type="date" id="filtroDataFim">
+                </div>
+            </div>
+            <button onclick="gerarRelatorio()" class="botao-submit" style="width: 100%;">📊 Gerar Relatório</button>
+        </div>
+
+        <div id="resumo" style="display: none;">
+            <h3>📈 Resumo</h3>
+            <div class="resumo-grid">
+                <div class="resumo-card">
+                    <div>Total de Registros</div>
+                    <div class="resumo-valor" id="totalRegistros">0</div>
+                </div>
+                <div class="resumo-card" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                    <div>Total de Entradas</div>
+                    <div class="resumo-valor" id="totalEntradas">0</div>
+                </div>
+                <div class="resumo-card" style="background: linear-gradient(135deg, #dc3545, #c82333);">
+                    <div>Total de Saídas</div>
+                    <div class="resumo-valor" id="totalSaidas">0</div>
+                </div>
+                <div class="resumo-card" style="background: linear-gradient(135deg, #ffa500, #ff8c00);">
+                    <div>Horas Trabalhadas</div>
+                    <div class="resumo-valor" id="horasTrabalhadas">0h</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultado">
+            <p style="text-align: center; color: #666; padding: 40px;">
+                Selecione os filtros e clique em "Gerar Relatório" para visualizar os dados.
+            </p>
+        </div>
+    </main>
+
+    <footer style="background: linear-gradient(135deg, #006837, #009b3a); color: white; text-align: center; padding: 20px; margin-top: 40px; box-shadow: 0 -4px 6px rgba(0,0,0,0.1);">
+        <p style="margin: 5px 0; font-size: 0.9em;">⚡ <strong>tchERP</strong> - Sistema Gaúcho de Gestão de RH 🏛️</p>
+        <p style="margin: 5px 0; font-size: 0.8em; opacity: 0.9;">Desenvolvido com orgulho na UERGS</p>
+        <p style="margin: 5px 0; font-size: 0.75em; opacity: 0.8;">© 2025 - Bah, tchê! 🧉</p>
+    </footer>
+
+    <script>
+        const API_URL = 'http://localhost:8080/api';
+
+        window.onload = async function() {
+            await carregarFuncionarios();
+            
+            // Definir datas padrão (último mês)
+            const hoje = new Date();
+            const mesPassado = new Date(hoje);
+            mesPassado.setMonth(mesPassado.getMonth() - 1);
+            
+            document.getElementById('filtroDataInicio').value = mesPassado.toISOString().split('T')[0];
+            document.getElementById('filtroDataFim').value = hoje.toISOString().split('T')[0];
+        };
+
+        async function carregarFuncionarios() {
+            try {
+                const response = await fetch(`${API_URL}/funcionarios`);
+                const funcionarios = await response.json();
+                
+                const select = document.getElementById('filtroFuncionario');
+                funcionarios.forEach(func => {
+                    const option = document.createElement('option');
+                    option.value = func.id;
+                    option.textContent = `${func.nome} (ID: ${func.id})`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar funcionários:', error);
+            }
+        }
+
+        async function gerarRelatorio() {
+            const idFuncionario = document.getElementById('filtroFuncionario').value;
+            const dataInicio = document.getElementById('filtroDataInicio').value;
+            const dataFim = document.getElementById('filtroDataFim').value;
+
+            if (!dataInicio || !dataFim) {
+                alert('⚠️ Por favor, selecione as datas de início e fim.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/pontos`);
+                let pontos = await response.json();
+                
+                // Filtrar por funcionário se selecionado
+                if (idFuncionario) {
+                    pontos = pontos.filter(p => p.idFuncionario === parseInt(idFuncionario));
+                }
+                
+                // Filtrar por período
+                pontos = pontos.filter(p => {
+                    const dataPonto = parseData(p.data);
+                    const inicio = new Date(dataInicio);
+                    const fim = new Date(dataFim);
+                    return dataPonto >= inicio && dataPonto <= fim;
+                });
+                
+                exibirRelatorio(pontos);
+            } catch (error) {
+                console.error('Erro ao gerar relatório:', error);
+                alert('❌ Erro ao gerar relatório. Verifique se o servidor está rodando.');
+            }
+        }
+
+        function parseData(dataStr) {
+            // Formato: DD/MM/YYYY
+            const [dia, mes, ano] = dataStr.split('/');
+            return new Date(ano, mes - 1, dia);
+        }
+
+        function exibirRelatorio(pontos) {
+            const resumoDiv = document.getElementById('resumo');
+            const resultadoDiv = document.getElementById('resultado');
+            
+            if (pontos.length === 0) {
+                resumoDiv.style.display = 'none';
+                resultadoDiv.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">📭 Nenhum registro encontrado para os filtros selecionados.</p>';
+                return;
+            }
+            
+            // Calcular estatísticas
+            const totalRegistros = pontos.length;
+            const totalEntradas = pontos.filter(p => p.tipo === 'ENTRADA').length;
+            const totalSaidas = pontos.filter(p => p.tipo === 'SAIDA').length;
+            const horasTrabalhadas = calcularHorasTrabalhadas(pontos);
+            
+            // Atualizar resumo
+            document.getElementById('totalRegistros').textContent = totalRegistros;
+            document.getElementById('totalEntradas').textContent = totalEntradas;
+            document.getElementById('totalSaidas').textContent = totalSaidas;
+            document.getElementById('horasTrabalhadas').textContent = horasTrabalhadas;
+            resumoDiv.style.display = 'block';
+            
+            // Agrupar por data
+            const pontosPorDia = {};
+            pontos.forEach(ponto => {
+                if (!pontosPorDia[ponto.data]) {
+                    pontosPorDia[ponto.data] = [];
+                }
+                pontosPorDia[ponto.data].push(ponto);
+            });
+            
+            // Ordenar datas
+            const datasOrdenadas = Object.keys(pontosPorDia).sort((a, b) => {
+                return parseData(b) - parseData(a); // Mais recente primeiro
+            });
+            
+            // Montar HTML
+            let html = '<h3>📅 Detalhamento por Dia</h3>';
+            
+            datasOrdenadas.forEach(data => {
+                const pontosDia = pontosPorDia[data];
+                const diaSemana = parseData(data).toLocaleDateString('pt-BR', { weekday: 'long' });
+                
+                html += `
+                    <div class="dia-grupo">
+                        <div class="dia-header">
+                            📅 ${data} - ${diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1)}
+                            <span style="float: right;">Total: ${pontosDia.length} registro(s)</span>
+                        </div>
+                `;
+                
+                pontosDia.forEach(ponto => {
+                    const classTipo = ponto.tipo === 'ENTRADA' ? 'ponto-entrada' : 'ponto-saida';
+                    const badgeClass = ponto.tipo === 'ENTRADA' ? 'badge-entrada' : 'badge-saida';
+                    const icone = ponto.tipo === 'ENTRADA' ? '▶️' : '⏸️';
+                    
+                    html += `
+                        <div class="ponto-item ${classTipo}">
+                            <div>
+                                <strong>${icone} ${ponto.hora}</strong>
+                                ${ponto.observacao ? `<br><small style="color: #666;">📝 ${ponto.observacao}</small>` : ''}
+                            </div>
+                            <span class="badge ${badgeClass}">${ponto.tipo}</span>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            });
+            
+            resultadoDiv.innerHTML = html;
+        }
+
+        function calcularHorasTrabalhadas(pontos) {
+            // Agrupar por data e funcionário
+            const grupos = {};
+            
+            pontos.forEach(ponto => {
+                const chave = `${ponto.idFuncionario}-${ponto.data}`;
+                if (!grupos[chave]) {
+                    grupos[chave] = [];
+                }
+                grupos[chave].push(ponto);
+            });
+            
+            let totalMinutos = 0;
+            
+            // Para cada grupo, calcular horas trabalhadas
+            Object.values(grupos).forEach(grupo => {
+                // Ordenar por hora
+                grupo.sort((a, b) => {
+                    return a.hora.localeCompare(b.hora);
+                });
+                
+                // Calcular diferença entre entradas e saídas
+                for (let i = 0; i < grupo.length - 1; i += 2) {
+                    if (grupo[i].tipo === 'ENTRADA' && grupo[i + 1] && grupo[i + 1].tipo === 'SAIDA') {
+                        const [h1, m1] = grupo[i].hora.split(':').map(Number);
+                        const [h2, m2] = grupo[i + 1].hora.split(':').map(Number);
+                        
+                        const minutos1 = h1 * 60 + m1;
+                        const minutos2 = h2 * 60 + m2;
+                        
+                        totalMinutos += (minutos2 - minutos1);
+                    }
+                }
+            });
+            
+            const horas = Math.floor(totalMinutos / 60);
+            const minutos = totalMinutos % 60;
+            
+            return `${horas}h${minutos > 0 ? ` ${minutos}min` : ''}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tchERP - Registro de Pontos</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+    <link rel="stylesheet" href="estilo.css">
+    <style>
+        .menu-nav {
+            background: linear-gradient(135deg, #006837, #009b3a);
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .menu-nav a {
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            margin: 0 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .menu-nav a:hover {
+            background-color: rgba(255, 213, 0, 0.3);
+            transform: translateY(-2px);
+        }
+        .ponto-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid #004d99;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .ponto-entrada {
+            border-left-color: #28a745;
+        }
+        .ponto-saida {
+            border-left-color: #dc3545;
+        }
+        .ponto-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .ponto-badge {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .badge-entrada {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .badge-saida {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <header class="cabecalho-logo">
+        <h1>⚡ tchERP</h1>
+        <p>🏛️ Sistema Gaúcho de Gestão de RH 🏛️</p>
+    </header>
+
+    <nav class="menu-nav">
+        <a href="/" style="border: 2px solid transparent;">🏠 Início</a>
+        <a href="/frontend/cadastro.html" style="border: 2px solid transparent;">➕ Cadastrar</a>
+        <a href="/frontend/listagem.html" style="border: 2px solid transparent;">📋 Listagem</a>
+        <a href="/frontend/pontos.html" style="background-color: rgba(255, 213, 0, 0.3); border: 2px solid #ffd500;">⏰ Pontos</a>
+        <a href="/frontend/relatorios.html" style="border: 2px solid transparent;">📊 Relatórios</a>
+    </nav>
+
+    <main>
+        <h2>⏰ Registro de Pontos</h2>
+        
+        <form id="formPonto" style="margin-bottom: 30px;">
+            <div class="campo-grupo">
+                <label for="idFuncionario">ID do Funcionário:</label>
+                <input type="number" id="idFuncionario" name="idFuncionario" required>
+            </div>
+
+            <div class="campo-grupo">
+                <label for="tipo">Tipo:</label>
+                <select id="tipo" name="tipo" required>
+                    <option value="ENTRADA">Entrada</option>
+                    <option value="SAIDA">Saída</option>
+                </select>
+            </div>
+
+            <div class="campo-grupo">
+                <label for="observacao">Observação (opcional):</label>
+                <input type="text" id="observacao" name="observacao" placeholder="Ex: Reunião, Almoço...">
+            </div>
+
+            <button type="submit" class="botao-submit">✓ Registrar Ponto</button>
+        </form>
+
+        <hr style="margin: 30px 0;">
+
+        <h3>📊 Registros Recentes</h3>
+        <div id="listaPontos">
+            <p style="text-align: center; color: #666;">Carregando registros...</p>
+        </div>
+    </main>
+
+    <footer style="background: linear-gradient(135deg, #006837, #009b3a); color: white; text-align: center; padding: 20px; margin-top: 40px; box-shadow: 0 -4px 6px rgba(0,0,0,0.1);">
+        <p style="margin: 5px 0; font-size: 0.9em;">⚡ <strong>tchERP</strong> - Sistema Gaúcho de Gestão de RH 🏛️</p>
+        <p style="margin: 5px 0; font-size: 0.8em; opacity: 0.9;">🌾 Desenvolvido com orgulho no Rio Grande do Sul 🌾</p>
+        <p style="margin: 5px 0; font-size: 0.75em; opacity: 0.8;">© 2025 - Bah, tchê! 🧉</p>
+    </footer>
+
+    <script>
+        const API_URL = 'http://localhost:8080/api';
+
+        window.onload = function() {
+            carregarPontos();
+        };
+
+        document.getElementById('formPonto').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const agora = new Date();
+            const data = agora.toLocaleDateString('pt-BR');
+            const hora = agora.toLocaleTimeString('pt-BR');
+
+            const ponto = {
+                idFuncionario: parseInt(document.getElementById('idFuncionario').value),
+                data: data,
+                hora: hora,
+                tipo: document.getElementById('tipo').value,
+                observacao: document.getElementById('observacao').value || ''
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/pontos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(ponto)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('✅ Ponto registrado com sucesso!');
+                    document.getElementById('formPonto').reset();
+                    carregarPontos();
+                } else {
+                    alert('❌ Erro: ' + (result.error || 'Erro desconhecido'));
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('❌ Erro ao conectar com o servidor');
+            }
+        });
+
+        async function carregarPontos() {
+            try {
+                const response = await fetch(`${API_URL}/pontos`);
+                const pontos = await response.json();
+                
+                const lista = document.getElementById('listaPontos');
+                
+                if (pontos.length === 0) {
+                    lista.innerHTML = '<p style="text-align: center; color: #666;">Nenhum registro de ponto encontrado</p>';
+                    return;
+                }
+
+                // Mostrar apenas os 20 mais recentes
+                const pontosRecentes = pontos.slice(-20).reverse();
+                
+                lista.innerHTML = '';
+                pontosRecentes.forEach(ponto => {
+                    const div = document.createElement('div');
+                    div.className = `ponto-card ponto-${ponto.tipo.toLowerCase()}`;
+                    div.innerHTML = `
+                        <div class="ponto-info">
+                            <div>
+                                <strong>Funcionário ID: ${String(ponto.idFuncionario).padStart(5, '0')}</strong><br>
+                                <span style="color: #666;">📅 ${ponto.data} às ${ponto.hora}</span>
+                            </div>
+                            <div>
+                                <span class="ponto-badge badge-${ponto.tipo.toLowerCase()}">${ponto.tipo}</span>
+                            </div>
+                        </div>
+                        ${ponto.observacao ? `<div style="margin-top: 8px; color: #666;">💬 ${ponto.observacao}</div>` : ''}
+                    `;
+                    lista.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar pontos:', error);
+                document.getElementById('listaPontos').innerHTML = 
+                    '<p style="text-align: center; color: #dc3545;">❌ Erro ao carregar registros</p>';
+            }
+        }
+    </script>
+</body>
+</html>

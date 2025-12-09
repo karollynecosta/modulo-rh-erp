@@ -1,20 +1,147 @@
 #include "../include/ponto.h"
-#include "../include/validacao.h"
+#include "../include/sistema_rh.h"
 #include <iostream>
-#include <iomanip>
 #include <sstream>
+#include <iomanip>
 #include <ctime>
+#include <cctype>
 #include <algorithm>
 #include <map>
 
 using namespace std;
 
+// ========== Implementação da Classe RegistroPonto ==========
+
+RegistroPonto::RegistroPonto(int idFuncionario, const string& data, const string& hora,
+                           const string& tipo, const string& observacao)
+    : idFuncionario(idFuncionario), data(data), hora(hora), tipo(tipo), observacao(observacao) {}
+
+string RegistroPonto::formatarParaArquivo() const {
+    ostringstream oss;
+    oss << idFuncionario << ";" << data << ";" << hora << ";" << tipo << ";" << observacao;
+    return oss.str();
+}
+
+// ========== Métodos Estáticos de Validação ==========
+
+bool RegistroPonto::validarData(const string& data) {
+    if (data.length() != 10) return false;
+    if (data[2] != '/' || data[5] != '/') return false;
+    
+    for (int i = 0; i < 10; i++) {
+        if (i != 2 && i != 5 && !isdigit(data[i])) {
+            return false;
+        }
+    }
+    
+    int dia = stoi(data.substr(0, 2));
+    int mes = stoi(data.substr(3, 2));
+    int ano = stoi(data.substr(6, 4));
+    
+    if (mes < 1 || mes > 12) return false;
+    if (dia < 1 || dia > 31) return false;
+    if (ano < 1900 || ano > 2100) return false;
+    
+    // Verificação básica de dias por mês
+    int diasPorMes[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    if (ano % 4 == 0 && (ano % 100 != 0 || ano % 400 == 0)) {
+        diasPorMes[1] = 29; // Ano bissexto
+    }
+    
+    return dia <= diasPorMes[mes - 1];
+}
+
+bool RegistroPonto::validarHora(const string& hora) {
+    if (hora.length() != 8) return false;
+    if (hora[2] != ':' || hora[5] != ':') return false;
+    
+    for (int i = 0; i < 8; i++) {
+        if (i != 2 && i != 5 && !isdigit(hora[i])) {
+            return false;
+        }
+    }
+    
+    int horas = stoi(hora.substr(0, 2));
+    int minutos = stoi(hora.substr(3, 2));
+    int segundos = stoi(hora.substr(6, 2));
+    
+    return horas >= 0 && horas < 24 && 
+           minutos >= 0 && minutos < 60 && 
+           segundos >= 0 && segundos < 60;
+}
+
+bool RegistroPonto::validarTipo(const string& tipo) {
+    return tipo == "ENTRADA" || tipo == "SAIDA";
+}
+
+// ========== Métodos Utilitários Estáticos ==========
+
+string RegistroPonto::obterDataAtual() {
+    time_t agora = time(0);
+    tm* tempoLocal = localtime(&agora);
+    
+    stringstream ss;
+    ss << setfill('0') << setw(2) << tempoLocal->tm_mday << "/"
+       << setw(2) << (tempoLocal->tm_mon + 1) << "/"
+       << (tempoLocal->tm_year + 1900);
+    
+    return ss.str();
+}
+
+string RegistroPonto::obterHoraAtual() {
+    time_t agora = time(0);
+    tm* tempoLocal = localtime(&agora);
+    
+    stringstream ss;
+    ss << setfill('0') << setw(2) << tempoLocal->tm_hour << ":"
+       << setw(2) << tempoLocal->tm_min << ":"
+       << setw(2) << tempoLocal->tm_sec;
+    
+    return ss.str();
+}
+
+double RegistroPonto::converterHoraParaDecimal(const string& hora) {
+    if (hora.length() < 8) return 0.0;
+    
+    int h = stoi(hora.substr(0, 2));
+    int m = stoi(hora.substr(3, 2));
+    int s = stoi(hora.substr(6, 2));
+    
+    return h + (m / 60.0) + (s / 3600.0);
+}
+
+double RegistroPonto::calcularHorasEntreHorarios(const string& entrada, const string& saida) {
+    double horaEntrada = converterHoraParaDecimal(entrada);
+    double horaSaida = converterHoraParaDecimal(saida);
+    
+    if (horaSaida >= horaEntrada) {
+        return horaSaida - horaEntrada;
+    } else {
+        // Saída no dia seguinte
+        return (24.0 - horaEntrada) + horaSaida;
+    }
+}
+
+// ========== Implementação da Classe GerenciadorPonto (para CLI) ==========
+
 void GerenciadorPonto::registrarEntrada(SistemaRH& sistema, int idFuncionario, const string& observacao) {
-    string data = obterDataAtual();
-    string hora = obterHoraAtual();
+    string data = RegistroPonto::obterDataAtual();
+    string hora = RegistroPonto::obterHoraAtual();
     
     // Verificar se já existe entrada sem saída no mesmo dia
-    string ultimoTipo = getUltimoTipo(sistema, idFuncionario, data);
+    const auto& pontos = sistema.getPontos();
+    string ultimoTipo = "";
+    string ultimaHora = "";
+    
+    for (const auto& ponto : pontos) {
+        if (ponto.getIdFuncionario() == idFuncionario && ponto.getData() == data) {
+            if (ponto.getHora() > ultimaHora) {
+                ultimaHora = ponto.getHora();
+                ultimoTipo = ponto.getTipo();
+            }
+        }
+    }
+    
     if (ultimoTipo == "ENTRADA") {
         cout << "Erro: Já existe uma entrada registrada sem saída para este funcionário hoje." << endl;
         return;
@@ -25,11 +152,23 @@ void GerenciadorPonto::registrarEntrada(SistemaRH& sistema, int idFuncionario, c
 }
 
 void GerenciadorPonto::registrarSaida(SistemaRH& sistema, int idFuncionario, const string& observacao) {
-    string data = obterDataAtual();
-    string hora = obterHoraAtual();
+    string data = RegistroPonto::obterDataAtual();
+    string hora = RegistroPonto::obterHoraAtual();
     
     // Verificar se existe entrada sem saída
-    string ultimoTipo = getUltimoTipo(sistema, idFuncionario, data);
+    const auto& pontos = sistema.getPontos();
+    string ultimoTipo = "";
+    string ultimaHora = "";
+    
+    for (const auto& ponto : pontos) {
+        if (ponto.getIdFuncionario() == idFuncionario && ponto.getData() == data) {
+            if (ponto.getHora() > ultimaHora) {
+                ultimaHora = ponto.getHora();
+                ultimoTipo = ponto.getTipo();
+            }
+        }
+    }
+    
     if (ultimoTipo != "ENTRADA") {
         cout << "Erro: Não há entrada registrada para este funcionário hoje." << endl;
         return;
@@ -41,13 +180,7 @@ void GerenciadorPonto::registrarSaida(SistemaRH& sistema, int idFuncionario, con
 
 void GerenciadorPonto::registrarManual(SistemaRH& sistema, int idFuncionario, const string& data, 
                                       const string& hora, const string& tipo, const string& observacao) {
-    RegistroPonto ponto;
-    ponto.setIdFuncionario(idFuncionario);
-    ponto.setData(data);
-    ponto.setHora(hora);
-    ponto.setTipo(tipo);
-    ponto.setObservacao(observacao);
-    
+    RegistroPonto ponto(idFuncionario, data, hora, tipo, observacao);
     sistema.adicionarPonto(ponto);
 }
 
@@ -183,7 +316,7 @@ void GerenciadorPonto::relatorioMensal(const SistemaRH& sistema, int idFuncionar
                 entrada = ponto.getHora();
             } else if (ponto.getTipo() == "SAIDA" && entrada != "-") {
                 saida = ponto.getHora();
-                horasDia += calcularHorasEntreHorarios(entrada, saida);
+                horasDia += RegistroPonto::calcularHorasEntreHorarios(entrada, saida);
                 entrada = "-"; // Reset para próxima entrada
             }
         }
@@ -197,83 +330,4 @@ void GerenciadorPonto::relatorioMensal(const SistemaRH& sistema, int idFuncionar
     
     cout << "\nTotal de horas trabalhadas no mês: " << fixed << setprecision(2) 
          << totalHoras << "h" << endl;
-}
-
-void GerenciadorPonto::calcularHorasTrabalhadas(const SistemaRH& sistema, int idFuncionario, int mes, int ano) {
-    relatorioMensal(sistema, idFuncionario, mes, ano);
-}
-
-void GerenciadorPonto::listarHorasDiarias(const SistemaRH& sistema, int idFuncionario, int mes, int ano) {
-    relatorioMensal(sistema, idFuncionario, mes, ano);
-}
-
-string GerenciadorPonto::obterDataAtual() {
-    time_t agora = time(0);
-    tm* tempoLocal = localtime(&agora);
-    
-    stringstream ss;
-    ss << setfill('0') << setw(2) << tempoLocal->tm_mday << "/"
-       << setw(2) << (tempoLocal->tm_mon + 1) << "/"
-       << (tempoLocal->tm_year + 1900);
-    
-    return ss.str();
-}
-
-string GerenciadorPonto::obterHoraAtual() {
-    time_t agora = time(0);
-    tm* tempoLocal = localtime(&agora);
-    
-    stringstream ss;
-    ss << setfill('0') << setw(2) << tempoLocal->tm_hour << ":"
-       << setw(2) << tempoLocal->tm_min << ":"
-       << setw(2) << tempoLocal->tm_sec;
-    
-    return ss.str();
-}
-
-bool GerenciadorPonto::validarData(const string& data) {
-    return RegistroPontoValidacao::dataValida(data);
-}
-
-bool GerenciadorPonto::validarHora(const string& hora) {
-    return RegistroPontoValidacao::horaValida(hora);
-}
-
-string GerenciadorPonto::getUltimoTipo(const SistemaRH& sistema, int idFuncionario, const string& data) {
-    const auto& pontos = sistema.getPontos();
-    string ultimoTipo = "";
-    string ultimaHora = "";
-    
-    for (const auto& ponto : pontos) {
-        if (ponto.getIdFuncionario() == idFuncionario && ponto.getData() == data) {
-            if (ponto.getHora() > ultimaHora) {
-                ultimaHora = ponto.getHora();
-                ultimoTipo = ponto.getTipo();
-            }
-        }
-    }
-    
-    return ultimoTipo;
-}
-
-double GerenciadorPonto::converterHoraParaDecimal(const string& hora) {
-    if (hora.length() < 8) return 0.0;
-    
-    int h = stoi(hora.substr(0, 2));
-    int m = stoi(hora.substr(3, 2));
-    int s = stoi(hora.substr(6, 2));
-    
-    return h + (m / 60.0) + (s / 3600.0);
-}
-
-double GerenciadorPonto::calcularHorasEntreHorarios(const string& entrada, const string& saida) {
-    double horaEntrada = converterHoraParaDecimal(entrada);
-    double horaSaida = converterHoraParaDecimal(saida);
-    
-    if (horaSaida >= horaEntrada) {
-        return horaSaida - horaEntrada;
-    } else {
-        // Saída no dia seguinte
-        return (24.0 - horaEntrada) + horaSaida;
-    }
 }

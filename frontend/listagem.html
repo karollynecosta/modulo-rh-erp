@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tchERP - Listagem de Funcionários</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+    <link rel="stylesheet" href="estilo.css">
+    <style>
+        .menu-nav {
+            background: linear-gradient(135deg, #006837, #009b3a);
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .menu-nav a {
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            margin: 0 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .menu-nav a:hover {
+            background-color: rgba(255, 213, 0, 0.3);
+            transform: translateY(-2px);
+        }
+        .tabela-funcionarios {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .tabela-funcionarios th,
+        .tabela-funcionarios td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            vertical-align: middle;
+        }
+        .tabela-funcionarios th {
+            background: linear-gradient(135deg, #006837, #009b3a);
+            color: white;
+            font-weight: 600;
+        }
+        .tabela-funcionarios th:last-child,
+        .tabela-funcionarios td:last-child {
+            width: 200px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .tabela-funcionarios tr:hover {
+            background-color: #f0f8ff;
+        }
+        .foto-funcionario {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ffd500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .sem-foto {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #006837, #009b3a);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            border: 2px solid #ffd500;
+        }
+        .botao-acao {
+            padding: 8px 12px;
+            margin: 2px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        .botao-acao:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .botao-editar {
+            background-color: #ffc107;
+            color: #333;
+        }
+        .botao-excluir {
+            background-color: #dc3545;
+            color: white;
+        }
+        .botao-atualizar {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 20px 0;
+        }
+        .status-message {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <header class="cabecalho-logo">
+        <h1>⚡ tchERP</h1>
+        <p>🏛️ Sistema Gaúcho de Gestão de RH 🏛️</p>
+    </header>
+
+    <nav class="menu-nav">
+        <a href="/" style="border: 2px solid transparent;">🏠 Início</a>
+        <a href="/frontend/cadastro.html" style="border: 2px solid transparent;">➕ Cadastrar</a>
+        <a href="/frontend/listagem.html" style="background-color: rgba(255, 213, 0, 0.3); border: 2px solid #ffd500;">📋 Listagem</a>
+        <a href="/frontend/pontos.html" style="border: 2px solid transparent;">⏰ Pontos</a>
+    </nav>
+
+    <main>
+        <h2>📋 Funcionários Cadastrados</h2>
+        
+        <div id="statusMessage"></div>
+        
+        <button class="botao-atualizar" onclick="carregarFuncionarios()">🔄 Atualizar Lista</button>
+        
+        <table class="tabela-funcionarios">
+            <thead>
+                <tr>
+                    <th>Foto</th>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Setor</th>
+                    <th>Cargo</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="tabelaBody">
+                <tr>
+                    <td colspan="7" style="text-align: center;">Carregando...</td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+
+    <footer style="background: linear-gradient(135deg, #006837, #009b3a); color: white; text-align: center; padding: 20px; margin-top: 40px; box-shadow: 0 -4px 6px rgba(0,0,0,0.1);">
+        <p style="margin: 5px 0; font-size: 0.9em;">⚡ <strong>tchERP</strong> - Sistema Gaúcho de Gestão de RH 🏛️</p>
+        <p style="margin: 5px 0; font-size: 0.8em; opacity: 0.9;">🌾 Desenvolvido com orgulho no Rio Grande do Sul 🌾</p>
+        <p style="margin: 5px 0; font-size: 0.75em; opacity: 0.8;">© 2025 - Bah, tchê! 🧉</p>
+    </footer>
+
+    <script>
+        const API_URL = 'http://localhost:8080/api';
+
+        window.onload = function() {
+            carregarFuncionarios();
+        };
+
+        async function carregarFuncionarios() {
+            try {
+                const response = await fetch(`${API_URL}/funcionarios`);
+                const funcionarios = await response.json();
+                
+                const tbody = document.getElementById('tabelaBody');
+                
+                if (funcionarios.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum funcionário cadastrado</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = '';
+                funcionarios.forEach(func => {
+                    const tr = document.createElement('tr');
+                    
+                    // Criar célula da foto
+                    const tdFoto = document.createElement('td');
+                    if (func.foto && func.foto !== '') {
+                        const img = document.createElement('img');
+                        img.src = func.foto;
+                        img.alt = func.nome;
+                        img.className = 'foto-funcionario';
+                        img.onerror = function() {
+                            // Se a imagem não carregar, mostrar inicial
+                            this.style.display = 'none';
+                            const divInicial = document.createElement('div');
+                            divInicial.className = 'sem-foto';
+                            divInicial.textContent = func.nome.charAt(0).toUpperCase();
+                            this.parentElement.appendChild(divInicial);
+                        };
+                        tdFoto.appendChild(img);
+                    } else {
+                        const divInicial = document.createElement('div');
+                        divInicial.className = 'sem-foto';
+                        divInicial.textContent = func.nome.charAt(0).toUpperCase();
+                        tdFoto.appendChild(divInicial);
+                    }
+                    
+                    tr.appendChild(tdFoto);
+                    tr.innerHTML += `
+                        <td>${String(func.id).padStart(5, '0')}</td>
+                        <td>${func.nome}</td>
+                        <td>${formatarCPF(func.cpf)}</td>
+                        <td>${func.setor}</td>
+                        <td>${func.cargo}</td>
+                        <td>
+                            <button class="botao-acao" onclick="editarFuncionario(${func.id})" style="background: linear-gradient(135deg, #ffa500, #ff8c00); color: white;">✏️ Editar</button>
+                            <button class="botao-acao botao-excluir" onclick="excluirFuncionario(${func.id})">🗑️ Excluir</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                
+                mostrarMensagem('Lista atualizada com sucesso!', 'success');
+            } catch (error) {
+                console.error('Erro ao carregar funcionários:', error);
+                mostrarMensagem('Erro ao conectar com o servidor', 'error');
+            }
+        }
+
+        function formatarCPF(cpf) {
+            if (!cpf || cpf.length !== 11) return cpf;
+            return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        }
+
+        function editarFuncionario(id) {
+            window.location.href = `/frontend/edicao.html?id=${id}`;
+        }
+
+        async function excluirFuncionario(id) {
+            if (!confirm('Tem certeza que deseja excluir este funcionário?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/funcionarios/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    mostrarMensagem('Funcionário excluído com sucesso!', 'success');
+                    carregarFuncionarios();
+                } else {
+                    const result = await response.json();
+                    mostrarMensagem('Erro: ' + (result.error || 'Erro desconhecido'), 'error');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarMensagem('Erro ao conectar com o servidor', 'error');
+            }
+        }
+
+        function mostrarMensagem(mensagem, tipo) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = `status-message status-${tipo}`;
+            statusDiv.textContent = mensagem;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
