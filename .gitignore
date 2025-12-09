@@ -7,6 +7,13 @@
 *.obj
 *.elf
 
+# Configuração com senhas
+config.ini*
+
+# Backups
+backups/
+*.backup
+
 # Linker output
 *.ilk
 *.map

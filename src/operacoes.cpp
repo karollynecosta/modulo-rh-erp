@@ -168,10 +168,10 @@ void OperacoesRH::registrarPontoManual(SistemaRH& sistema) {
     
     cout << "Funcionário: " << func->getNome() << endl;
     
-    string data = Validacao::entradaString("Data (DD/MM/AAAA): ", &RegistroPontoValidacao::dataValida);
+    string data = Validacao::entradaString("Data (DD/MM/AAAA): ", &RegistroPonto::validarData);
     if (data == "0") return;
     
-    string hora = Validacao::entradaString("Hora (HH:MM:SS): ", &RegistroPontoValidacao::horaValida);
+    string hora = Validacao::entradaString("Hora (HH:MM:SS): ", &RegistroPonto::validarHora);
     if (hora == "0") return;
     
     cout << "1. Entrada" << endl;
@@ -210,7 +210,7 @@ void OperacoesRH::consultarPontos(const SistemaRH& sistema) {
         if (id == 0) return;
         GerenciadorPonto::listarPorFuncionario(sistema, id);
     } else if (opcao == "2") {
-        string data = Validacao::entradaString("Data (DD/MM/AAAA): ", &RegistroPontoValidacao::dataValida);
+        string data = Validacao::entradaString("Data (DD/MM/AAAA): ", &RegistroPonto::validarData);
         if (data == "0") return;
         GerenciadorPonto::listarPorData(sistema, data);
     } else if (opcao == "3") {

@@ -7,7 +7,7 @@ using namespace std;
 
 // Validações gerais movidas para namespaces específicos:
 // - FuncionarioValidacao: nomeValido, cpfValido (em funcionario.cpp)
-// - RegistroPontoValidacao: dataValida, horaValida (em registro_ponto.cpp)
+// - RegistroPonto: validarData, validarHora (métodos estáticos em ponto.cpp)
 // - SetorValidacao: nomeSetorValido, nomeCargoValido (em setor.cpp)
 
 bool Validacao::idValido(int id, const SistemaRH& sistema, int idAtual) {

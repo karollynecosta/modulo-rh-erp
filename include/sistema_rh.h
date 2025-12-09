@@ -4,7 +4,7 @@
 #include "types.h"
 #include "funcionario.h"
 #include "setor.h"
-#include "registro_ponto.h"
+#include "ponto.h"
 
 // Classe principal do sistema de RH
 class SistemaRH {
